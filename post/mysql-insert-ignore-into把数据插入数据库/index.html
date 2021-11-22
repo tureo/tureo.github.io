@@ -1,0 +1,483 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Mysql Insert Ignore Into把数据插入数据库 - tureo</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="tureo"><meta name=description content="问题背景 最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口"><meta name=keywords content="mysql,go,gin,gorm,toml,insert ignore"><meta name=generator content="Hugo 0.62.2 with theme even"><link rel=canonical href=http://localhost:1313/post/mysql-insert-ignore-into%E6%8A%8A%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE%E5%BA%93/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.a2095472a2a8d7ddda1334cf60051cbe40ed55f2467554bb6aa4c17c9bcd27a4.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="Mysql Insert Ignore Into把数据插入数据库"><meta property="og:description" content="问题背景 最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口"><meta property="og:type" content="article"><meta property="og:url" content="http://localhost:1313/post/mysql-insert-ignore-into%E6%8A%8A%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE%E5%BA%93/"><meta property="article:published_time" content="2021-11-22T21:52:45+08:00"><meta property="article:modified_time" content="2021-11-22T21:52:45+08:00"><meta itemprop=name content="Mysql Insert Ignore Into把数据插入数据库"><meta itemprop=description content="问题背景 最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口"><meta itemprop=datePublished content="2021-11-22T21:52:45+08:00"><meta itemprop=dateModified content="2021-11-22T21:52:45+08:00"><meta itemprop=wordCount content="1762"><meta itemprop=keywords content="mysql,go,gin,gorm,toml,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Mysql Insert Ignore Into把数据插入数据库"><meta name=twitter:description content="问题背景 最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>tureo</a></div><div class=mobile-navbar-icon><span></span><span></span><span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>首页</li></a><a href=/post/><li class=mobile-menu-item>归档</li></a><a href=/tags/><li class=mobile-menu-item>标签</li></a><a href=/categories/><li class=mobile-menu-item>分类</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>tureo</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>首页</a></li><li class=menu-item><a class=menu-item-link href=/post/>归档</a></li><li class=menu-item><a class=menu-item-link href=/tags/>标签</a></li><li class=menu-item><a class=menu-item-link href=/categories/>分类</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>Mysql Insert Ignore Into把数据插入数据库</h1><div class=post-meta><span class=post-time>2021-11-22</span><div class=post-category><a href=/categories/mysql/>mysql</a>
+<a href=/categories/go/>go</a>
+<a href=/categories/gin/>gin</a>
+<a href=/categories/gorm/>gorm</a>
+<a href=/categories/toml/>toml</a></div><span class=more-meta>约 1762 字</span>
+<span class=more-meta>预计阅读 4 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><a href=#问题背景>问题背景</a></li><li><a href=#mysql直接插入的解决方法>mysql直接插入的解决方法</a></li><li><a href=#使用mysqlgogingorm的解决方法>使用mysql+go+gin+gorm的解决方法</a></li></ul></nav></div></div><div class=post-content><h1 id=问题背景>问题背景</h1><p>最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口的请求头中取，所以需要写一个api路由中间件，每当用户请求后端接口时：
+<strong>判断用户名是否存在本地数据库的user用户表中，如果存在，则忽略，不存在则插入</strong>。
+user表建表语句大致如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-SQL data-lang=SQL><span class=k>CREATE</span> <span class=k>TABLE</span> <span class=o>`</span><span class=k>user</span><span class=o>`</span> <span class=p>(</span>
+  <span class=o>`</span><span class=n>id</span><span class=o>`</span> <span class=nb>int</span><span class=p>(</span><span class=mi>10</span><span class=p>)</span> <span class=n>unsigned</span> <span class=k>NOT</span> <span class=k>NULL</span> <span class=n>AUTO_INCREMENT</span> <span class=k>COMMENT</span> <span class=s1>&#39;</span><span class=s1>用户ID</span><span class=s1>&#39;</span><span class=p>,</span>
+  <span class=o>`</span><span class=n>username</span><span class=o>`</span> <span class=nb>varchar</span><span class=p>(</span><span class=mi>255</span><span class=p>)</span> <span class=k>NOT</span> <span class=k>NULL</span> <span class=k>DEFAULT</span> <span class=s1>&#39;</span><span class=s1>&#39;</span> <span class=k>COMMENT</span> <span class=s1>&#39;</span><span class=s1>用户名</span><span class=s1>&#39;</span><span class=p>,</span>
+  <span class=o>`</span><span class=n>created_at</span><span class=o>`</span> <span class=k>timestamp</span> <span class=k>NULL</span> <span class=k>DEFAULT</span> <span class=k>CURRENT_TIMESTAMP</span> <span class=k>COMMENT</span> <span class=s1>&#39;</span><span class=s1>创建时间</span><span class=s1>&#39;</span><span class=p>,</span>
+  <span class=o>`</span><span class=n>updated_at</span><span class=o>`</span> <span class=k>timestamp</span> <span class=k>NULL</span> <span class=k>DEFAULT</span> <span class=k>CURRENT_TIMESTAMP</span> <span class=k>ON</span> <span class=k>UPDATE</span> <span class=k>CURRENT_TIMESTAMP</span> <span class=k>COMMENT</span> <span class=s1>&#39;</span><span class=s1>更新时间</span><span class=s1>&#39;</span><span class=p>,</span>
+  <span class=k>PRIMARY</span> <span class=k>KEY</span> <span class=p>(</span><span class=o>`</span><span class=n>id</span><span class=o>`</span><span class=p>)</span> <span class=k>USING</span> <span class=n>BTREE</span><span class=p>,</span>
+  <span class=k>UNIQUE</span> <span class=k>KEY</span> <span class=o>`</span><span class=n>uidx_name</span><span class=o>`</span> <span class=p>(</span><span class=o>`</span><span class=n>username</span><span class=o>`</span><span class=p>)</span> <span class=k>USING</span> <span class=n>BTREE</span> <span class=k>COMMENT</span> <span class=s1>&#39;</span><span class=s1>用户名需要唯一</span><span class=s1>&#39;</span>
+<span class=p>)</span> <span class=n>ENGINE</span><span class=o>=</span><span class=n>InnoDB</span> <span class=n>CHARSET</span><span class=o>=</span><span class=n>utf8</span> <span class=k>COMMENT</span><span class=o>=</span><span class=s1>&#39;</span><span class=s1>用户记录表</span><span class=s1>&#39;</span><span class=p>;</span>
+</code></pre></td></tr></table></div></div><h1 id=mysql直接插入的解决方法>mysql直接插入的解决方法</h1><p>使用mysql的insert ignore into语句
+<code>insert ignore into user(username) values("xyz");</code>
+不会影响原有的数据值，<code>updated_at</code>的值也不会变。
+<a href=https://www.yiibai.com/mysql/insert-ignore.html>参考：insert-ignore</a>
+<a href=https://www.cnblogs.com/stevin-john/p/4768904.html>扩展：Insert into，Replace Into，Insert ignore</a></p><details><summary>其他想法</summary>
+最开始想的是：先select再insert<p>1.先根据用户名查询数据库：
+<code>select id,username from user where username="xyz";</code>
+2.如果查询不到用户就插入：
+<code>insert into user(username) values("xyz");</code>
+这样就需要两个步骤，后来搜索找到上面只需要一个步骤的解决方法。
+TODO：（用redis实现？）</p></details><hr><h1 id=使用mysqlgogingorm的解决方法>使用mysql+go+gin+gorm的解决方法</h1><p>由于项目框架主要基于mysql+go+gin+gorm搭建，所以可以实现如下写法：</p><p>路由文件，myweb/internal/router/router.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>router</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=s>&#34;myweb/internal/middleware&#34;</span>
+	<span class=s>&#34;github.com/gin-gonic/gin&#34;</span>
+<span class=p>)</span>
+<span class=kd>func</span> <span class=nf>InitRouter</span><span class=p>(</span><span class=p>)</span> <span class=o>*</span><span class=nx>gin</span><span class=p>.</span><span class=nx>Engine</span> <span class=p>{</span>
+	<span class=nx>r</span> <span class=o>:=</span> <span class=nx>gin</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=p>)</span>
+	<span class=nx>api</span> <span class=o>:=</span> <span class=nx>r</span><span class=p>.</span><span class=nf>Group</span><span class=p>(</span><span class=s>&#34;/api&#34;</span><span class=p>)</span>
+	<span class=c1>// 使用中间件，将用户名插入用户表中
+</span><span class=c1></span>	<span class=nx>api</span><span class=p>.</span><span class=nf>Use</span><span class=p>(</span><span class=nx>middleware</span><span class=p>.</span><span class=nf>InsertUser</span><span class=p>(</span><span class=p>)</span><span class=p>)</span> <span class=c1>// 重点
+</span><span class=c1></span>	<span class=k>return</span> <span class=nx>r</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><p>中间件文件，myweb/internal/middleware/user.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>middleware</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=c1>// &#34;myweb/internal/pkg/logger&#34;
+</span><span class=c1></span>	<span class=s>&#34;myweb/internal/service/user_service&#34;</span>
+	<span class=s>&#34;github.com/gin-gonic/gin&#34;</span>
+<span class=p>)</span>
+<span class=c1>// 将用户名插入用户表中，如果用户已经存在，则忽略
+</span><span class=c1></span><span class=kd>func</span> <span class=nf>InsertUser</span><span class=p>(</span><span class=p>)</span> <span class=nx>gin</span><span class=p>.</span><span class=nx>HandlerFunc</span> <span class=p>{</span>
+	<span class=k>return</span> <span class=kd>func</span><span class=p>(</span><span class=nx>c</span> <span class=o>*</span><span class=nx>gin</span><span class=p>.</span><span class=nx>Context</span><span class=p>)</span> <span class=p>{</span>
+        <span class=c1>// 从请求头获取用户名
+</span><span class=c1></span>		<span class=nx>username</span> <span class=o>:=</span> <span class=nx>c</span><span class=p>.</span><span class=nf>GetHeader</span><span class=p>(</span><span class=s>&#34;X-User-Name&#34;</span><span class=p>)</span>
+		<span class=nx>err</span> <span class=o>:=</span> <span class=nx>user_service</span><span class=p>.</span><span class=nf>InsertIgnore</span><span class=p>(</span><span class=nx>username</span><span class=p>)</span> <span class=c1>// 重点
+</span><span class=c1></span>		<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+			<span class=c1>//logger.Error(&#34;user middleware InsertUser: failed to InsertIgnore user &#34;, username, err.Error())
+</span><span class=c1></span>		<span class=p>}</span>
+		<span class=nx>c</span><span class=p>.</span><span class=nf>Next</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><p>service文件，myweb/internal/service/user_service/user.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>user_service</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=s>&#34;myweb/internal/model&#34;</span>
+	<span class=c1>// &#34;myweb/internal/pkg/logger&#34;
+</span><span class=c1></span><span class=p>)</span>
+<span class=c1>// 插入用户，如果用户已经存在，则忽略
+</span><span class=c1></span><span class=kd>func</span> <span class=nf>InsertIgnore</span><span class=p>(</span><span class=nx>username</span> <span class=kt>string</span><span class=p>)</span> <span class=p>(</span><span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=nx>user</span> <span class=o>:=</span> <span class=nb>new</span><span class=p>(</span><span class=nx>model</span><span class=p>.</span><span class=nx>User</span><span class=p>)</span>
+	<span class=nx>err</span> <span class=p>=</span> <span class=nx>user</span><span class=p>.</span><span class=nf>InsertIgnore</span><span class=p>(</span><span class=nx>username</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=c1>// logger.Error(err)
+</span><span class=c1></span>		<span class=k>return</span> <span class=nx>err</span>
+	<span class=p>}</span>
+	<span class=k>return</span> <span class=nx>err</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><p>model文件，myweb/internal/model/user.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>model</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=c1>// &#34;myweb/internal/pkg/logger&#34;
+</span><span class=c1></span>	<span class=s>&#34;myweb/internal/pkg/mysql&#34;</span>
+	<span class=s>&#34;github.com/pkg/errors&#34;</span>
+<span class=p>)</span>
+<span class=c1>// user表结构体
+</span><span class=c1></span><span class=kd>type</span> <span class=nx>User</span> <span class=kd>struct</span> <span class=p>{</span>
+	<span class=nx>ID</span>         <span class=kt>int</span>
+	<span class=nx>Username</span>   <span class=kt>string</span>
+	<span class=nx>CreatedAt</span>  <span class=nx>time</span><span class=p>.</span><span class=nx>Time</span> <span class=s>`</span><span class=s>gorm:&#34;time&#34;</span><span class=s>`</span>
+	<span class=nx>UpdatedAt</span>  <span class=nx>time</span><span class=p>.</span><span class=nx>Time</span> <span class=s>`</span><span class=s>gorm:&#34;time&#34;</span><span class=s>`</span>
+<span class=p>}</span>
+<span class=c1>//  插入用户，如果已经存在则忽略
+</span><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>t</span> <span class=o>*</span><span class=nx>User</span><span class=p>)</span> <span class=nf>InsertIgnore</span><span class=p>(</span><span class=nx>username</span> <span class=kt>string</span><span class=p>)</span> <span class=p>(</span><span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+    <span class=c1>// gorm v1还不支持ignore
+</span><span class=c1></span>    <span class=c1>// gorm v2才支持用db.Clauses(clause.Insert{Modifier: &#34;IGNORE&#34;}).Create(&amp;user)
+</span><span class=c1></span>    <span class=c1>// 这里用原始sql执行
+</span><span class=c1></span>	<span class=nx>_</span><span class=p>,</span> <span class=nx>err</span> <span class=p>=</span> <span class=nx>mysql</span><span class=p>.</span><span class=nf>GetDB</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nf>DB</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nf>Exec</span><span class=p>(</span><span class=s>&#34;INSERT IGNORE INTO user(username) VALUES(?);&#34;</span><span class=p>,</span> <span class=nx>username</span><span class=p>)</span> <span class=c1>// 重点
+</span><span class=c1></span>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=c1>// logger.Error(&#34;InsertIgnore user err: &#34;, err)
+</span><span class=c1></span>		<span class=k>return</span> <span class=nx>errors</span><span class=p>.</span><span class=nf>Wrap</span><span class=p>(</span><span class=nx>err</span><span class=p>,</span> <span class=s>&#34;InsertIgnore user err&#34;</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>return</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><p>gorm连接mysql数据库文件，myweb/internal/pkg/mysql/mysql.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>mysql</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=s>&#34;myweb/configs&#34;</span>
+	<span class=s>&#34;fmt&#34;</span>
+	<span class=s>&#34;github.com/jinzhu/gorm&#34;</span>
+	<span class=nx>_</span> <span class=s>&#34;github.com/jinzhu/gorm/dialects/mysql&#34;</span>
+<span class=p>)</span>
+<span class=kd>var</span> <span class=nx>db</span> <span class=o>*</span><span class=nx>gorm</span><span class=p>.</span><span class=nx>DB</span>
+<span class=c1>// InitMysql Setup initializes the database instance
+</span><span class=c1></span><span class=kd>func</span> <span class=nf>InitMysql</span><span class=p>(</span><span class=p>)</span> <span class=kt>error</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=nx>err</span> <span class=kt>error</span>
+	<span class=nx>db</span><span class=p>,</span> <span class=nx>err</span> <span class=p>=</span> <span class=nx>gorm</span><span class=p>.</span><span class=nf>Open</span><span class=p>(</span><span class=s>&#34;mysql&#34;</span><span class=p>,</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Sprintf</span><span class=p>(</span><span class=s>&#34;%s:%s@tcp(%s)/%s?charset=utf8&amp;parseTime=True&amp;loc=Local&#34;</span><span class=p>,</span>
+		<span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>User</span><span class=p>,</span>
+		<span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>Password</span><span class=p>,</span>
+		<span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>Host</span><span class=p>,</span>
+		<span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>Name</span><span class=p>)</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>return</span> <span class=nx>err</span>
+	<span class=p>}</span>
+	<span class=c1>//db.LogMode(true)
+</span><span class=c1></span>	<span class=nx>gorm</span><span class=p>.</span><span class=nx>DefaultTableNameHandler</span> <span class=p>=</span> <span class=kd>func</span><span class=p>(</span><span class=nx>db</span> <span class=o>*</span><span class=nx>gorm</span><span class=p>.</span><span class=nx>DB</span><span class=p>,</span> <span class=nx>defaultTableName</span> <span class=kt>string</span><span class=p>)</span> <span class=kt>string</span> <span class=p>{</span>
+		<span class=k>return</span> <span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>TablePrefix</span> <span class=o>+</span> <span class=nx>defaultTableName</span>
+	<span class=p>}</span>
+	<span class=nx>db</span><span class=p>.</span><span class=nf>SingularTable</span><span class=p>(</span><span class=kc>true</span><span class=p>)</span>
+	<span class=nx>db</span><span class=p>.</span><span class=nf>DB</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nf>SetMaxIdleConns</span><span class=p>(</span><span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>MaxIdle</span><span class=p>)</span>
+	<span class=nx>db</span><span class=p>.</span><span class=nf>DB</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nf>SetMaxOpenConns</span><span class=p>(</span><span class=nx>configs</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nx>Mysql</span><span class=p>.</span><span class=nx>MaxActive</span><span class=p>)</span>
+	<span class=k>return</span> <span class=kc>nil</span>
+<span class=p>}</span>
+<span class=c1>// GetDB get database client
+</span><span class=c1></span><span class=kd>func</span> <span class=nf>GetDB</span><span class=p>(</span><span class=p>)</span> <span class=o>*</span><span class=nx>gorm</span><span class=p>.</span><span class=nx>DB</span> <span class=p>{</span>
+	<span class=k>return</span> <span class=nx>db</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><p>读取配置文件，configs/configs.go</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>configs</span>
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=s>&#34;myweb/internal/pkg/env&#34;</span>
+	<span class=s>&#34;time&#34;</span>
+
+	<span class=s>&#34;github.com/fsnotify/fsnotify&#34;</span>
+	<span class=s>&#34;github.com/spf13/viper&#34;</span>
+<span class=p>)</span>
+<span class=kd>var</span> <span class=nx>config</span> <span class=p>=</span> <span class=nb>new</span><span class=p>(</span><span class=nx>Config</span><span class=p>)</span>
+<span class=kd>type</span> <span class=nx>Config</span> <span class=kd>struct</span> <span class=p>{</span>
+	<span class=nx>Server</span> <span class=kd>struct</span> <span class=p>{</span>
+		<span class=nx>HttpPort</span>     <span class=kt>int</span>           <span class=s>`</span><span class=s>toml:&#34;HttpPort&#34;</span><span class=s>`</span>
+		<span class=nx>ReadTimeout</span>  <span class=nx>time</span><span class=p>.</span><span class=nx>Duration</span> <span class=s>`</span><span class=s>toml:&#34;ReadTimeout&#34;</span><span class=s>`</span>
+		<span class=nx>WriteTimeout</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Duration</span> <span class=s>`</span><span class=s>toml:&#34;WriteTimeout&#34;</span><span class=s>`</span>
+		<span class=nx>Version</span>      <span class=kt>string</span>        <span class=s>`</span><span class=s>toml:&#34;Version&#34;</span><span class=s>`</span>
+		<span class=nx>TmpFilePath</span>  <span class=kt>string</span>        <span class=s>`</span><span class=s>toml:&#34;TmpFilePath&#34;</span><span class=s>`</span>
+	<span class=p>}</span> <span class=s>`</span><span class=s>toml:&#34;server&#34;</span><span class=s>`</span>
+
+	<span class=nx>Mysql</span> <span class=kd>struct</span> <span class=p>{</span>
+		<span class=nx>Host</span>        <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;Host&#34;</span><span class=s>`</span>
+		<span class=nx>User</span>        <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;User&#34;</span><span class=s>`</span>
+		<span class=nx>Password</span>    <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;Password&#34;</span><span class=s>`</span>
+		<span class=nx>Name</span>        <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;Name&#34;</span><span class=s>`</span>
+		<span class=nx>TablePrefix</span> <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;TablePrefix&#34;</span><span class=s>`</span>
+		<span class=nx>MaxIdle</span>     <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;MaxIdle&#34;</span><span class=s>`</span>
+		<span class=nx>MaxActive</span>   <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;MaxActive&#34;</span><span class=s>`</span>
+	<span class=p>}</span> <span class=s>`</span><span class=s>toml:&#34;mysql&#34;</span><span class=s>`</span>
+
+	<span class=nx>Redis</span> <span class=kd>struct</span> <span class=p>{</span>
+		<span class=nx>Host</span>        <span class=kt>string</span>        <span class=s>`</span><span class=s>toml:&#34;Host&#34;</span><span class=s>`</span>
+		<span class=nx>Password</span>    <span class=kt>string</span>        <span class=s>`</span><span class=s>toml:&#34;Password&#34;</span><span class=s>`</span>
+		<span class=nx>RedisPrefix</span> <span class=kt>string</span>        <span class=s>`</span><span class=s>toml:&#34;RedisPrefix&#34;</span><span class=s>`</span>
+		<span class=nx>MaxIdle</span>     <span class=kt>int</span>           <span class=s>`</span><span class=s>toml:&#34;MaxIdle&#34;</span><span class=s>`</span>
+		<span class=nx>MaxActive</span>   <span class=kt>int</span>           <span class=s>`</span><span class=s>toml:&#34;MaxActive&#34;</span><span class=s>`</span>
+		<span class=nx>RedisDB</span>     <span class=kt>int</span>           <span class=s>`</span><span class=s>toml:&#34;RedisDB&#34;</span><span class=s>`</span>
+		<span class=nx>IdleTimeout</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Duration</span> <span class=s>`</span><span class=s>toml:&#34;IdleTimeout&#34;</span><span class=s>`</span>
+	<span class=p>}</span> <span class=s>`</span><span class=s>toml:&#34;redis&#34;</span><span class=s>`</span>
+
+	<span class=nx>Language</span> <span class=kd>struct</span> <span class=p>{</span>
+		<span class=nx>Local</span> <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;Local&#34;</span><span class=s>`</span>
+	<span class=p>}</span> <span class=s>`</span><span class=s>toml:&#34;language&#34;</span><span class=s>`</span>
+
+	<span class=nx>Log</span> <span class=kd>struct</span> <span class=p>{</span>
+		<span class=nx>Level</span>         <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;Level&#34;</span><span class=s>`</span>
+		<span class=nx>LogFormatJson</span> <span class=kt>bool</span>   <span class=s>`</span><span class=s>toml:&#34;LogFormatJson&#34;</span><span class=s>`</span>
+		<span class=nx>TimeKey</span>       <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;TimeKey&#34;</span><span class=s>`</span>
+		<span class=nx>LevelKey</span>      <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;LevelKey&#34;</span><span class=s>`</span>
+		<span class=nx>NameKey</span>       <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;NameKey&#34;</span><span class=s>`</span>
+		<span class=nx>CallerKey</span>     <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;CallerKey&#34;</span><span class=s>`</span>
+		<span class=nx>MessageKey</span>    <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;MessageKey&#34;</span><span class=s>`</span>
+		<span class=nx>StackTrackKey</span> <span class=kt>string</span> <span class=s>`</span><span class=s>toml:&#34;StackTrackKey&#34;</span><span class=s>`</span>
+		<span class=nx>MaxSize</span>       <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;MaxSize&#34;</span><span class=s>`</span>
+		<span class=nx>MaxBackups</span>    <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;MaxBackups&#34;</span><span class=s>`</span>
+		<span class=nx>MaxAge</span>        <span class=kt>int</span>    <span class=s>`</span><span class=s>toml:&#34;MaxAge&#34;</span><span class=s>`</span>
+	<span class=p>}</span> <span class=s>`</span><span class=s>toml:&#34;log&#34;</span><span class=s>`</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>Setup</span><span class=p>(</span><span class=p>)</span> <span class=p>{</span>
+	<span class=nx>viper</span><span class=p>.</span><span class=nf>SetConfigName</span><span class=p>(</span><span class=nx>env</span><span class=p>.</span><span class=nf>Active</span><span class=p>(</span><span class=p>)</span><span class=p>.</span><span class=nf>Value</span><span class=p>(</span><span class=p>)</span> <span class=o>+</span> <span class=s>&#34;_configs&#34;</span><span class=p>)</span>
+	<span class=nx>viper</span><span class=p>.</span><span class=nf>SetConfigType</span><span class=p>(</span><span class=s>&#34;toml&#34;</span><span class=p>)</span>
+	<span class=nx>viper</span><span class=p>.</span><span class=nf>AddConfigPath</span><span class=p>(</span><span class=s>&#34;./configs&#34;</span><span class=p>)</span>
+
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>viper</span><span class=p>.</span><span class=nf>ReadInConfig</span><span class=p>(</span><span class=p>)</span><span class=p>;</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nb>panic</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>viper</span><span class=p>.</span><span class=nf>Unmarshal</span><span class=p>(</span><span class=nx>config</span><span class=p>)</span><span class=p>;</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nb>panic</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>viper</span><span class=p>.</span><span class=nf>WatchConfig</span><span class=p>(</span><span class=p>)</span>
+	<span class=nx>viper</span><span class=p>.</span><span class=nf>OnConfigChange</span><span class=p>(</span><span class=kd>func</span><span class=p>(</span><span class=nx>e</span> <span class=nx>fsnotify</span><span class=p>.</span><span class=nx>Event</span><span class=p>)</span> <span class=p>{</span>
+		<span class=k>if</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>viper</span><span class=p>.</span><span class=nf>Unmarshal</span><span class=p>(</span><span class=nx>config</span><span class=p>)</span><span class=p>;</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+			<span class=nb>panic</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span>
+		<span class=p>}</span>
+	<span class=p>}</span><span class=p>)</span>
+<span class=p>}</span>
+
+<span class=kd>func</span> <span class=nf>Get</span><span class=p>(</span><span class=p>)</span> <span class=nx>Config</span> <span class=p>{</span>
+	<span class=k>return</span> <span class=o>*</span><span class=nx>config</span>
+<span class=p>}</span>
+
+</code></pre></td></tr></table></div></div><p>配置文件，configs/dev_configs.toml</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-TOML data-lang=TOML><span class=p>[</span><span class=nx>server</span><span class=p>]</span>
+    <span class=nx>HttpPort</span> <span class=p>=</span> <span class=mi>8000</span>
+    <span class=nx>ReadTimeout</span> <span class=p>=</span> <span class=mi>60</span>
+    <span class=nx>WriteTimeout</span> <span class=p>=</span> <span class=mi>60</span>
+    <span class=nx>Version</span> <span class=p>=</span> <span class=s2>&#34;1.0.0&#34;</span>
+    <span class=nx>TmpFilePath</span> <span class=p>=</span> <span class=s2>&#34;/tmp&#34;</span>
+
+<span class=p>[</span><span class=nx>language</span><span class=p>]</span>
+    <span class=nx>local</span> <span class=p>=</span> <span class=s2>&#34;zh-cn&#34;</span>
+
+<span class=p>[</span><span class=nx>mysql</span><span class=p>]</span>
+    <span class=nx>Host</span> <span class=p>=</span> <span class=s2>&#34;127.0.0.1:3306&#34;</span>
+    <span class=nx>Name</span> <span class=p>=</span> <span class=s2>&#34;myweb&#34;</span>
+    <span class=nx>Password</span> <span class=p>=</span> <span class=s2>&#34;123456&#34;</span>
+    <span class=nx>User</span> <span class=p>=</span> <span class=s2>&#34;root&#34;</span>
+    <span class=nx>TablePrefix</span> <span class=p>=</span> <span class=s2>&#34;&#34;</span>
+
+<span class=p>[</span><span class=nx>redis</span><span class=p>]</span>
+    <span class=nx>Host</span> <span class=p>=</span> <span class=s2>&#34;127.0.0.1:6379&#34;</span>
+    <span class=nx>Password</span> <span class=p>=</span> <span class=s2>&#34;&#34;</span>
+    <span class=nx>MaxIdle</span> <span class=p>=</span> <span class=mi>30</span>
+    <span class=nx>MaxActive</span> <span class=p>=</span> <span class=mi>30</span>
+    <span class=nx>IdleTimeout</span> <span class=p>=</span> <span class=mi>200</span>
+    <span class=nx>RedisDB</span> <span class=p>=</span> <span class=mi>0</span>
+    <span class=nx>RedisPrefix</span> <span class=p>=</span> <span class=s2>&#34;&#34;</span>
+
+<span class=p>[</span><span class=nx>log</span><span class=p>]</span>
+    <span class=nx>Level</span> <span class=p>=</span> <span class=mi>0</span>
+    <span class=nx>LogFormatJson</span> <span class=p>=</span> <span class=kc>true</span>
+    <span class=nx>TimeKey</span> <span class=p>=</span> <span class=s2>&#34;time&#34;</span>
+    <span class=nx>LevelKey</span> <span class=p>=</span> <span class=s2>&#34;level&#34;</span>
+    <span class=nx>NameKey</span> <span class=p>=</span> <span class=s2>&#34;name&#34;</span>
+    <span class=nx>CallerKey</span> <span class=p>=</span> <span class=s2>&#34;caller&#34;</span>
+    <span class=nx>MessageKey</span> <span class=p>=</span> <span class=s2>&#34;message&#34;</span>
+</code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>tureo</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2021-11-22</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/mysql/>mysql</a>
+<a href=/tags/go/>go</a>
+<a href=/tags/gin/>gin</a>
+<a href=/tags/gorm/>gorm</a>
+<a href=/tags/toml/>toml</a></div><nav class=post-nav><a class=next href=/post/%E5%86%85%E7%BD%91%E9%80%9A%E8%BF%87%E5%AE%89%E8%A3%85squid%E4%BB%A3%E7%90%86%E8%AE%BF%E9%97%AE%E5%85%AC%E7%BD%91/><span class="next-text nav-default">内网通过安装squid代理访问公网</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:dawushi@hotmail.com class="iconfont icon-email" title=email></a><a href=https://github.com/tureo class="iconfont icon-github" title=github></a><a href=http://localhost:1313/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动</span>
+<span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2021<span class=heart><i class="iconfont icon-heart"></i></span><span>tureo</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script><script>var languageCode="en".replace(/-/g,'_').replace(/_(.*)/,function($0,$1){return $0.replace($1,$1.toUpperCase());});timeago().render(document.querySelectorAll('.timeago'),languageCode);timeago.cancel();</script><script type=text/javascript src=/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js></script></body></html>
