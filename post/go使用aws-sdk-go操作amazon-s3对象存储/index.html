@@ -1,0 +1,538 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>go使用aws-sdk-go操作Amazon S3对象存储 - tureo</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="tureo"><meta name=description content="说明 使用aws-sdk-go操作Amazon S3对象存储，包括文件上传（分段）、文件下载、查看文件列表、查看bucket列表、获取预签名ur"><meta name=keywords content="go,s3,aws"><meta name=generator content="Hugo 0.62.2 with theme even"><link rel=canonical href=http://localhost:1313/post/go%E4%BD%BF%E7%94%A8aws-sdk-go%E6%93%8D%E4%BD%9Camazon-s3%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.a2095472a2a8d7ddda1334cf60051cbe40ed55f2467554bb6aa4c17c9bcd27a4.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="go使用aws-sdk-go操作Amazon S3对象存储"><meta property="og:description" content="说明 使用aws-sdk-go操作Amazon S3对象存储，包括文件上传（分段）、文件下载、查看文件列表、查看bucket列表、获取预签名ur"><meta property="og:type" content="article"><meta property="og:url" content="http://localhost:1313/post/go%E4%BD%BF%E7%94%A8aws-sdk-go%E6%93%8D%E4%BD%9Camazon-s3%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8/"><meta property="article:published_time" content="2022-01-12T11:54:41+08:00"><meta property="article:modified_time" content="2022-01-12T11:54:41+08:00"><meta itemprop=name content="go使用aws-sdk-go操作Amazon S3对象存储"><meta itemprop=description content="说明 使用aws-sdk-go操作Amazon S3对象存储，包括文件上传（分段）、文件下载、查看文件列表、查看bucket列表、获取预签名ur"><meta itemprop=datePublished content="2022-01-12T11:54:41+08:00"><meta itemprop=dateModified content="2022-01-12T11:54:41+08:00"><meta itemprop=wordCount content="1415"><meta itemprop=keywords content="go,s3,aws,"><meta name=twitter:card content="summary"><meta name=twitter:title content="go使用aws-sdk-go操作Amazon S3对象存储"><meta name=twitter:description content="说明 使用aws-sdk-go操作Amazon S3对象存储，包括文件上传（分段）、文件下载、查看文件列表、查看bucket列表、获取预签名ur"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>tureo</a></div><div class=mobile-navbar-icon><span></span><span></span><span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>首页</li></a><a href=/post/><li class=mobile-menu-item>归档</li></a><a href=/tags/><li class=mobile-menu-item>标签</li></a><a href=/categories/><li class=mobile-menu-item>分类</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>tureo</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>首页</a></li><li class=menu-item><a class=menu-item-link href=/post/>归档</a></li><li class=menu-item><a class=menu-item-link href=/tags/>标签</a></li><li class=menu-item><a class=menu-item-link href=/categories/>分类</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>go使用aws-sdk-go操作Amazon S3对象存储</h1><div class=post-meta><span class=post-time>2022-01-12</span><div class=post-category><a href=/categories/go/>go</a>
+<a href=/categories/s3/>s3</a>
+<a href=/categories/aws/>aws</a></div><span class=more-meta>约 1415 字</span>
+<span class=more-meta>预计阅读 3 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><a href=#说明>说明</a></li><li><a href=#安装aws-sdk-go>安装aws-sdk-go</a></li><li><a href=#导入包>导入包</a></li><li><a href=#上传文件>上传文件</a><ul><li><a href=#读文件上传>读文件上传</a></li><li><a href=#字节数组上传>字节数组上传</a></li></ul></li><li><a href=#下载文件>下载文件</a></li><li><a href=#查看文件列表>查看文件列表</a></li><li><a href=#查看bucket列表>查看bucket列表</a></li><li><a href=#获取预签名文件>获取预签名文件</a></li></ul></nav></div></div><div class=post-content><h1 id=说明>说明</h1><p>使用aws-sdk-go操作Amazon S3对象存储，包括文件上传（分段）、文件下载、查看文件列表、查看bucket列表、获取预签名url文件，通过context设置超时时间，文件上传使用分段上传。
+示例使用aws-sdk-go的<code>v1</code>版本
+<a href=https://github.com/aws/aws-sdk-go-v2>v2版本参考官方文档</a></p><h1 id=安装aws-sdk-go>安装aws-sdk-go</h1><p><code>go get github.com/aws/aws-sdk-go</code>
+<a href=https://github.com/aws/aws-sdk-go>参考</a></p><h1 id=导入包>导入包</h1><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kn>package</span> <span class=nx>aws</span>
+
+<span class=kn>import</span> <span class=p>(</span>
+	<span class=s>&#34;bytes&#34;</span>
+	<span class=s>&#34;context&#34;</span>
+	<span class=s>&#34;fmt&#34;</span>
+	<span class=s>&#34;os&#34;</span>
+
+	<span class=s>&#34;time&#34;</span>
+
+	<span class=s>&#34;github.com/aws/aws-sdk-go/aws&#34;</span>
+	<span class=s>&#34;github.com/aws/aws-sdk-go/aws/credentials&#34;</span>
+	<span class=s>&#34;github.com/aws/aws-sdk-go/aws/session&#34;</span>
+	<span class=s>&#34;github.com/aws/aws-sdk-go/service/s3&#34;</span>
+	<span class=s>&#34;github.com/aws/aws-sdk-go/service/s3/s3manager&#34;</span>
+<span class=p>)</span>
+</code></pre></td></tr></table></div></div><h1 id=上传文件>上传文件</h1><p>使用s3manager的方法进行分段上传
+<a href=https://docs.aws.amazon.com/sdk-for-go/api/service/s3/s3manager/#Uploader>参考</a></p><h2 id=读文件上传>读文件上传</h2><p>直接传入文件路径，方法中读取文件内容上传（分段）到S3。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>S3PutFileObject</span><span class=p>(</span><span class=nx>key</span> <span class=kt>string</span><span class=p>,</span> <span class=nx>filename</span> <span class=kt>string</span><span class=p>)</span> <span class=p>(</span><span class=nx>location</span> <span class=kt>string</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>bucket</span>    <span class=p>=</span> <span class=s>&#34;my-test&#34;</span>
+		<span class=nx>prefix</span>    <span class=p>=</span> <span class=s>&#34;dev&#34;</span>
+		<span class=nx>timeout</span>   <span class=p>=</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Duration</span><span class=p>(</span><span class=mi>180</span><span class=p>)</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span>
+	<span class=p>)</span>
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>options</span> <span class=o>:=</span> <span class=kd>func</span><span class=p>(</span><span class=nx>u</span> <span class=o>*</span><span class=nx>s3manager</span><span class=p>.</span><span class=nx>Uploader</span><span class=p>)</span> <span class=p>{</span>
+		<span class=nx>u</span><span class=p>.</span><span class=nx>PartSize</span> <span class=p>=</span> <span class=mi>50</span> <span class=o>*</span> <span class=mi>1024</span> <span class=o>*</span> <span class=mi>1024</span> <span class=c1>// 设置分段上传的PartSize大小为50MB
+</span><span class=c1></span>	<span class=p>}</span>
+
+	<span class=nx>uploader</span> <span class=o>:=</span> <span class=nx>s3manager</span><span class=p>.</span><span class=nf>NewUploader</span><span class=p>(</span><span class=nx>sess</span><span class=p>,</span> <span class=nx>options</span><span class=p>)</span>
+
+	<span class=nx>f</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>os</span><span class=p>.</span><span class=nf>Open</span><span class=p>(</span><span class=nx>filename</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;failed to open file %q, %v&#34;</span><span class=p>,</span> <span class=nx>filename</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>defer</span> <span class=nx>f</span><span class=p>.</span><span class=nf>Close</span><span class=p>(</span><span class=p>)</span>
+
+	<span class=c1>// 使用context设置超时时间
+</span><span class=c1></span>	<span class=nx>ctx</span> <span class=o>:=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>(</span><span class=p>)</span>
+	<span class=kd>var</span> <span class=nx>cancelFn</span> <span class=kd>func</span><span class=p>(</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>timeout</span> <span class=p>&gt;</span> <span class=mi>0</span> <span class=p>{</span>
+		<span class=nx>ctx</span><span class=p>,</span> <span class=nx>cancelFn</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>WithTimeout</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>timeout</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>if</span> <span class=nx>cancelFn</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>defer</span> <span class=nf>cancelFn</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>result</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>uploader</span><span class=p>.</span><span class=nf>UploadWithContext</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>s3manager</span><span class=p>.</span><span class=nx>UploadInput</span><span class=p>{</span>
+		<span class=nx>Bucket</span><span class=p>:</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>bucket</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Key</span><span class=p>:</span>    <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Sprintf</span><span class=p>(</span><span class=s>&#34;%s/%s&#34;</span><span class=p>,</span> <span class=nx>prefix</span><span class=p>,</span> <span class=nx>key</span><span class=p>)</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Body</span><span class=p>:</span>   <span class=nx>f</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;failed to upload file, %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span>
+	<span class=p>}</span>
+	<span class=nx>location</span> <span class=p>=</span> <span class=nx>result</span><span class=p>.</span><span class=nx>Location</span>
+	<span class=nx>fmt</span><span class=p>.</span><span class=nf>Printf</span><span class=p>(</span><span class=s>&#34;file uploaded to, %s\n&#34;</span><span class=p>,</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>StringValue</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>location</span><span class=p>)</span><span class=p>)</span>
+	<span class=k>return</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h2 id=字节数组上传>字节数组上传</h2><p>有时候需要直接将字节数组或字符串上传（分段）为S3文件，可通过下面的方法实现，跟上面的<a href=#%E8%AF%BB%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0>S3PutContentObject</a>方法的区别只是入参和文件内容处理的区别。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>S3PutContentObject</span><span class=p>(</span><span class=nx>key</span> <span class=kt>string</span><span class=p>,</span> <span class=nx>content</span> <span class=p>[</span><span class=p>]</span><span class=kt>byte</span><span class=p>)</span> <span class=p>(</span><span class=nx>location</span> <span class=kt>string</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>bucket</span>    <span class=p>=</span> <span class=s>&#34;my-test&#34;</span>
+		<span class=nx>prefix</span>    <span class=p>=</span> <span class=s>&#34;dev&#34;</span>
+		<span class=nx>timeout</span>   <span class=p>=</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Duration</span><span class=p>(</span><span class=mi>180</span><span class=p>)</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span>
+	<span class=p>)</span>
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>options</span> <span class=o>:=</span> <span class=kd>func</span><span class=p>(</span><span class=nx>u</span> <span class=o>*</span><span class=nx>s3manager</span><span class=p>.</span><span class=nx>Uploader</span><span class=p>)</span> <span class=p>{</span>
+		<span class=nx>u</span><span class=p>.</span><span class=nx>PartSize</span> <span class=p>=</span> <span class=mi>50</span> <span class=o>*</span> <span class=mi>1024</span> <span class=o>*</span> <span class=mi>1024</span> <span class=c1>// 设置分段上传的PartSize大小为50MB
+</span><span class=c1></span>	<span class=p>}</span>
+
+	<span class=nx>uploader</span> <span class=o>:=</span> <span class=nx>s3manager</span><span class=p>.</span><span class=nf>NewUploader</span><span class=p>(</span><span class=nx>sess</span><span class=p>,</span> <span class=nx>options</span><span class=p>)</span>
+
+	<span class=c1>// 使用context设置超时时间
+</span><span class=c1></span>	<span class=nx>ctx</span> <span class=o>:=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>(</span><span class=p>)</span>
+	<span class=kd>var</span> <span class=nx>cancelFn</span> <span class=kd>func</span><span class=p>(</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>timeout</span> <span class=p>&gt;</span> <span class=mi>0</span> <span class=p>{</span>
+		<span class=nx>ctx</span><span class=p>,</span> <span class=nx>cancelFn</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>WithTimeout</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>timeout</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>if</span> <span class=nx>cancelFn</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>defer</span> <span class=nf>cancelFn</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>result</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>uploader</span><span class=p>.</span><span class=nf>UploadWithContext</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>s3manager</span><span class=p>.</span><span class=nx>UploadInput</span><span class=p>{</span>
+		<span class=nx>Bucket</span><span class=p>:</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>bucket</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Key</span><span class=p>:</span>    <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Sprintf</span><span class=p>(</span><span class=s>&#34;%s/%s&#34;</span><span class=p>,</span> <span class=nx>prefix</span><span class=p>,</span> <span class=nx>key</span><span class=p>)</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Body</span><span class=p>:</span>   <span class=nx>bytes</span><span class=p>.</span><span class=nf>NewReader</span><span class=p>(</span><span class=nx>content</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;failed to upload file, %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span>
+	<span class=p>}</span>
+	<span class=nx>location</span> <span class=p>=</span> <span class=nx>result</span><span class=p>.</span><span class=nx>Location</span>
+	<span class=nx>fmt</span><span class=p>.</span><span class=nf>Printf</span><span class=p>(</span><span class=s>&#34;file uploaded to, %s\n&#34;</span><span class=p>,</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>StringValue</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>location</span><span class=p>)</span><span class=p>)</span>
+	<span class=k>return</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h1 id=下载文件>下载文件</h1><p><a href=https://docs.aws.amazon.com/sdk-for-go/api/service/s3/s3manager/#Downloader>参考</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>S3GetObject</span><span class=p>(</span><span class=nx>key</span> <span class=kt>string</span><span class=p>)</span> <span class=p>(</span><span class=nx>content</span> <span class=p>[</span><span class=p>]</span><span class=kt>byte</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>bucket</span>    <span class=p>=</span> <span class=s>&#34;my-test&#34;</span>
+		<span class=nx>prefix</span>    <span class=p>=</span> <span class=s>&#34;dev&#34;</span>
+		<span class=nx>timeout</span>   <span class=p>=</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Duration</span><span class=p>(</span><span class=mi>180</span><span class=p>)</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span>
+	<span class=p>)</span>
+
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>downloader</span> <span class=o>:=</span> <span class=nx>s3manager</span><span class=p>.</span><span class=nf>NewDownloader</span><span class=p>(</span><span class=nx>sess</span><span class=p>)</span>
+	<span class=nx>buffer</span> <span class=o>:=</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>NewWriteAtBuffer</span><span class=p>(</span><span class=p>[</span><span class=p>]</span><span class=kt>byte</span><span class=p>{</span><span class=p>}</span><span class=p>)</span>
+
+	<span class=c1>// 使用context设置超时时间
+</span><span class=c1></span>	<span class=nx>ctx</span> <span class=o>:=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>(</span><span class=p>)</span>
+	<span class=kd>var</span> <span class=nx>cancelFn</span> <span class=kd>func</span><span class=p>(</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>timeout</span> <span class=p>&gt;</span> <span class=mi>0</span> <span class=p>{</span>
+		<span class=nx>ctx</span><span class=p>,</span> <span class=nx>cancelFn</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>WithTimeout</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>timeout</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>if</span> <span class=nx>cancelFn</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>defer</span> <span class=nf>cancelFn</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>n</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>downloader</span><span class=p>.</span><span class=nf>DownloadWithContext</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>buffer</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>s3</span><span class=p>.</span><span class=nx>GetObjectInput</span><span class=p>{</span>
+		<span class=nx>Bucket</span><span class=p>:</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>bucket</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Key</span><span class=p>:</span>    <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Sprintf</span><span class=p>(</span><span class=s>&#34;%s/%s&#34;</span><span class=p>,</span> <span class=nx>prefix</span><span class=p>,</span> <span class=nx>key</span><span class=p>)</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;failed to download file %q, %v&#34;</span><span class=p>,</span> <span class=nx>key</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span>
+	<span class=p>}</span>
+
+	<span class=nx>fmt</span><span class=p>.</span><span class=nf>Printf</span><span class=p>(</span><span class=s>&#34;file downloaded, %d bytes\n&#34;</span><span class=p>,</span> <span class=nx>n</span><span class=p>)</span>
+	<span class=k>return</span> <span class=nx>buffer</span><span class=p>.</span><span class=nf>Bytes</span><span class=p>(</span><span class=p>)</span><span class=p>,</span> <span class=kc>nil</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h1 id=查看文件列表>查看文件列表</h1><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>S3ListObjects</span><span class=p>(</span><span class=p>)</span> <span class=p>(</span><span class=nx>objects</span> <span class=p>[</span><span class=p>]</span><span class=o>*</span><span class=nx>s3</span><span class=p>.</span><span class=nx>Object</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>bucket</span>    <span class=p>=</span> <span class=s>&#34;my-test&#34;</span>
+		<span class=nx>timeout</span>   <span class=p>=</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Duration</span><span class=p>(</span><span class=mi>180</span><span class=p>)</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span>
+	<span class=p>)</span>
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>svc</span> <span class=o>:=</span> <span class=nx>s3</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=nx>sess</span><span class=p>)</span>
+
+	<span class=c1>// 使用context设置超时时间
+</span><span class=c1></span>	<span class=nx>ctx</span> <span class=o>:=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>(</span><span class=p>)</span>
+	<span class=kd>var</span> <span class=nx>cancelFn</span> <span class=kd>func</span><span class=p>(</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>timeout</span> <span class=p>&gt;</span> <span class=mi>0</span> <span class=p>{</span>
+		<span class=nx>ctx</span><span class=p>,</span> <span class=nx>cancelFn</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>WithTimeout</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>timeout</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>if</span> <span class=nx>cancelFn</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>defer</span> <span class=nf>cancelFn</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>resp</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>svc</span><span class=p>.</span><span class=nf>ListObjectsV2WithContext</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>s3</span><span class=p>.</span><span class=nx>ListObjectsV2Input</span><span class=p>{</span><span class=nx>Bucket</span><span class=p>:</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>bucket</span><span class=p>)</span><span class=p>}</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;Unable to list items in bucket %q, %v&#34;</span><span class=p>,</span> <span class=nx>bucket</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span>
+	<span class=p>}</span>
+
+	<span class=nx>objects</span> <span class=p>=</span> <span class=nx>resp</span><span class=p>.</span><span class=nx>Contents</span>
+
+	<span class=c1>// for _, item := range objects {
+</span><span class=c1></span>	<span class=c1>// 	fmt.Println(&#34;Name:         &#34;, *item.Key)
+</span><span class=c1></span>	<span class=c1>// 	fmt.Println(&#34;Last modified:&#34;, *item.LastModified)
+</span><span class=c1></span>	<span class=c1>// 	fmt.Println(&#34;Size:         &#34;, *item.Size)
+</span><span class=c1></span>	<span class=c1>// 	fmt.Println(&#34;Storage class:&#34;, *item.StorageClass)
+</span><span class=c1></span>	<span class=c1>// 	fmt.Println(&#34;&#34;)
+</span><span class=c1></span>	<span class=c1>// }
+</span><span class=c1></span>
+	<span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;Found&#34;</span><span class=p>,</span> <span class=nb>len</span><span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>Contents</span><span class=p>)</span><span class=p>,</span> <span class=s>&#34;items in bucket&#34;</span><span class=p>,</span> <span class=nx>bucket</span><span class=p>)</span>
+	<span class=k>return</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h1 id=查看bucket列表>查看bucket列表</h1><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>S3ListBuckets</span><span class=p>(</span><span class=p>)</span> <span class=p>(</span><span class=nx>buckets</span> <span class=p>[</span><span class=p>]</span><span class=o>*</span><span class=nx>s3</span><span class=p>.</span><span class=nx>Bucket</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>timeout</span>   <span class=p>=</span> <span class=nx>time</span><span class=p>.</span><span class=nf>Duration</span><span class=p>(</span><span class=mi>180</span><span class=p>)</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Second</span>
+	<span class=p>)</span>
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>svc</span> <span class=o>:=</span> <span class=nx>s3</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=nx>sess</span><span class=p>)</span>
+
+	<span class=c1>// 使用context设置超时时间
+</span><span class=c1></span>	<span class=nx>ctx</span> <span class=o>:=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>(</span><span class=p>)</span>
+	<span class=kd>var</span> <span class=nx>cancelFn</span> <span class=kd>func</span><span class=p>(</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>timeout</span> <span class=p>&gt;</span> <span class=mi>0</span> <span class=p>{</span>
+		<span class=nx>ctx</span><span class=p>,</span> <span class=nx>cancelFn</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>WithTimeout</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>timeout</span><span class=p>)</span>
+	<span class=p>}</span>
+	<span class=k>if</span> <span class=nx>cancelFn</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=k>defer</span> <span class=nf>cancelFn</span><span class=p>(</span><span class=p>)</span>
+	<span class=p>}</span>
+
+	<span class=nx>result</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>svc</span><span class=p>.</span><span class=nf>ListBucketsWithContext</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=kc>nil</span><span class=p>)</span>
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;Unable to list buckets, %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span>
+	<span class=p>}</span>
+
+	<span class=nx>buckets</span> <span class=p>=</span> <span class=nx>result</span><span class=p>.</span><span class=nx>Buckets</span>
+
+	<span class=c1>// for _, b := range buckets {
+</span><span class=c1></span>	<span class=c1>// 	fmt.Printf(&#34;%s created on %s\n&#34;, aws.StringValue(b.Name), aws.TimeValue(b.CreationDate))
+</span><span class=c1></span>	<span class=c1>// }
+</span><span class=c1></span>
+	<span class=k>return</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div><h1 id=获取预签名文件>获取预签名文件</h1><p><a href=https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html>参考</a></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-Go data-lang=Go><span class=kd>func</span> <span class=nf>GetS3PreSignedURL</span><span class=p>(</span><span class=nx>cosFilePath</span> <span class=kt>string</span><span class=p>)</span> <span class=p>(</span><span class=kt>string</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+	<span class=kd>var</span> <span class=p>(</span>
+		<span class=nx>accessKey</span> <span class=p>=</span> <span class=s>&#34;AKIA4AAD&#34;</span>
+		<span class=nx>secretKey</span> <span class=p>=</span> <span class=s>&#34;eI6adadsaMtQ&#34;</span>
+		<span class=nx>region</span>    <span class=p>=</span> <span class=s>&#34;eu-west-1&#34;</span>
+		<span class=nx>bucket</span>    <span class=p>=</span> <span class=s>&#34;my-test&#34;</span>
+	<span class=p>)</span>
+
+	<span class=nx>sess</span> <span class=o>:=</span> <span class=nx>session</span><span class=p>.</span><span class=nf>Must</span><span class=p>(</span><span class=nx>session</span><span class=p>.</span><span class=nf>NewSession</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>aws</span><span class=p>.</span><span class=nx>Config</span><span class=p>{</span>
+		<span class=nx>Credentials</span><span class=p>:</span> <span class=nx>credentials</span><span class=p>.</span><span class=nf>NewStaticCredentials</span><span class=p>(</span><span class=nx>accessKey</span><span class=p>,</span> <span class=nx>secretKey</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Region</span><span class=p>:</span>      <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>region</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span><span class=p>)</span>
+
+	<span class=nx>svc</span> <span class=o>:=</span> <span class=nx>s3</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=nx>sess</span><span class=p>)</span>
+
+	<span class=nx>req</span><span class=p>,</span> <span class=nx>_</span> <span class=o>:=</span> <span class=nx>svc</span><span class=p>.</span><span class=nf>GetObjectRequest</span><span class=p>(</span><span class=o>&amp;</span><span class=nx>s3</span><span class=p>.</span><span class=nx>GetObjectInput</span><span class=p>{</span>
+		<span class=nx>Bucket</span><span class=p>:</span> <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>bucket</span><span class=p>)</span><span class=p>,</span>
+		<span class=nx>Key</span><span class=p>:</span>    <span class=nx>aws</span><span class=p>.</span><span class=nf>String</span><span class=p>(</span><span class=nx>cosFilePath</span><span class=p>)</span><span class=p>,</span>
+	<span class=p>}</span><span class=p>)</span>
+
+	<span class=nx>urlStr</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>req</span><span class=p>.</span><span class=nf>Presign</span><span class=p>(</span><span class=mi>7</span> <span class=o>*</span> <span class=mi>24</span> <span class=o>*</span> <span class=nx>time</span><span class=p>.</span><span class=nx>Hour</span><span class=p>)</span>
+
+	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+		<span class=nx>_</span> <span class=p>=</span> <span class=nx>fmt</span><span class=p>.</span><span class=nf>Errorf</span><span class=p>(</span><span class=s>&#34;get s3 pre signed url err: %v&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+		<span class=k>return</span> <span class=s>&#34;&#34;</span><span class=p>,</span> <span class=nx>err</span>
+	<span class=p>}</span>
+
+	<span class=k>return</span> <span class=nx>urlStr</span><span class=p>,</span> <span class=kc>nil</span>
+<span class=p>}</span>
+</code></pre></td></tr></table></div></div></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>tureo</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2022-01-12</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/go/>go</a>
+<a href=/tags/s3/>s3</a>
+<a href=/tags/aws/>aws</a></div><nav class=post-nav><a class=next href=/post/windows%E6%89%B9%E5%A4%84%E7%90%86%E8%84%9A%E6%9C%ACbat%E8%BF%9E%E6%8E%A5%E5%88%B0%E8%BF%9C%E7%A8%8Blinux%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E5%BA%94%E7%94%A8/><span class="next-text nav-default">Windows批处理脚本bat连接到远程Linux服务器自动部署应用</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:dawushi@hotmail.com class="iconfont icon-email" title=email></a><a href=https://github.com/tureo class="iconfont icon-github" title=github></a><a href=http://localhost:1313/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动</span>
+<span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2021 -
+2022<span class=heart><i class="iconfont icon-heart"></i></span><span>tureo</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script><script>var languageCode="en".replace(/-/g,'_').replace(/_(.*)/,function($0,$1){return $0.replace($1,$1.toUpperCase());});timeago().render(document.querySelectorAll('.timeago'),languageCode);timeago.cancel();</script><script type=text/javascript src=/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js></script></body></html>
