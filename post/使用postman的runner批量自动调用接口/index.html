@@ -1,0 +1,126 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>使用postman的runner批量自动调用接口 - tureo</title><meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="tureo"><meta name=description content="说明 有时候需要批量调用接口进行测试或者造数据，可以使用postman的runner进行。 示例 以下用http post + json的方式演示批量调用注册"><meta name=keywords content="postman,测试,接口"><meta name=generator content="Hugo 0.62.2 with theme even"><link rel=canonical href=http://localhost:1313/post/%E4%BD%BF%E7%94%A8postman%E7%9A%84runner%E6%89%B9%E9%87%8F%E8%87%AA%E5%8A%A8%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.a2095472a2a8d7ddda1334cf60051cbe40ed55f2467554bb6aa4c17c9bcd27a4.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:title" content="使用postman的runner批量自动调用接口"><meta property="og:description" content="说明 有时候需要批量调用接口进行测试或者造数据，可以使用postman的runner进行。 示例 以下用http post + json的方式演示批量调用注册"><meta property="og:type" content="article"><meta property="og:url" content="http://localhost:1313/post/%E4%BD%BF%E7%94%A8postman%E7%9A%84runner%E6%89%B9%E9%87%8F%E8%87%AA%E5%8A%A8%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3/"><meta property="article:published_time" content="2022-03-31T18:07:51+08:00"><meta property="article:modified_time" content="2022-03-31T18:07:51+08:00"><meta itemprop=name content="使用postman的runner批量自动调用接口"><meta itemprop=description content="说明 有时候需要批量调用接口进行测试或者造数据，可以使用postman的runner进行。 示例 以下用http post + json的方式演示批量调用注册"><meta itemprop=datePublished content="2022-03-31T18:07:51+08:00"><meta itemprop=dateModified content="2022-03-31T18:07:51+08:00"><meta itemprop=wordCount content="603"><meta itemprop=keywords content="postman,测试,接口,"><meta name=twitter:card content="summary"><meta name=twitter:title content="使用postman的runner批量自动调用接口"><meta name=twitter:description content="说明 有时候需要批量调用接口进行测试或者造数据，可以使用postman的runner进行。 示例 以下用http post + json的方式演示批量调用注册"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>tureo</a></div><div class=mobile-navbar-icon><span></span><span></span><span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>首页</li></a><a href=/post/><li class=mobile-menu-item>归档</li></a><a href=/tags/><li class=mobile-menu-item>标签</li></a><a href=/categories/><li class=mobile-menu-item>分类</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>tureo</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>首页</a></li><li class=menu-item><a class=menu-item-link href=/post/>归档</a></li><li class=menu-item><a class=menu-item-link href=/tags/>标签</a></li><li class=menu-item><a class=menu-item-link href=/categories/>分类</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>使用postman的runner批量自动调用接口</h1><div class=post-meta><span class=post-time>2022-03-31</span><div class=post-category><a href=/categories/postman/>postman</a>
+<a href=/categories/%E6%B5%8B%E8%AF%95/>测试</a>
+<a href=/categories/%E6%8E%A5%E5%8F%A3/>接口</a></div><span class=more-meta>约 603 字</span>
+<span class=more-meta>预计阅读 2 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><a href=#说明>说明</a></li><li><a href=#示例>示例</a></li><li><a href=#附录>附录</a><ul><li><a href=#如何快速批量生成json测试数据文件>如何快速批量生成json测试数据文件</a></li></ul></li></ul></nav></div></div><div class=post-content><h1 id=说明>说明</h1><p>有时候需要批量调用接口进行测试或者造数据，可以使用postman的runner进行。</p><h1 id=示例>示例</h1><p>以下用<code>http post + json</code>的方式演示批量调用注册接口插入用户数据。</p><ol><li><p>左边选择<code>collection</code>，再选择需要批量调用的请求目录，点击右边的<code>run</code>。
+<img src=/images/postman-runner/1.jpeg alt></p></li><li><p>中间勾选需要批量调用的<code>request</code>，可以多选。右边可以看到一些参数配置，可以设置每次请求的间隔时间等。
+<img src=/images/postman-runner/2.jpeg alt>
+请求的body形式为json，json的值需要设置为变量形式<code>{{变量名}}</code>，如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-JSON data-lang=JSON><span class=p>{</span>
+    <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;{{username}}&#34;</span><span class=p>,</span>
+    <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;{{password}}&#34;</span><span class=p>,</span>
+    <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=p>{</span><span class=err>{</span><span class=err>g</span><span class=err>e</span><span class=err>n</span><span class=err>d</span><span class=err>e</span><span class=err>r</span><span class=p>}</span><span class=p>}</span><span class=err>,</span>
+    <span class=s2>&#34;nickname&#34;</span><span class=err>:</span> <span class=s2>&#34;{{nickname}}&#34;</span>
+<span class=err>}</span>
+</code></pre></td></tr></table></div></div><p><img src=/images/postman-runner/8.jpeg alt></p></li><li><p>添加json数据文件
+json文件需要为一个数组，字段名对应body json中的变量名
+users.json：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-JSON data-lang=JSON><span class=p>[</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user1@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;awsd456&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>,</span>
+        <span class=nt>&#34;nickname&#34;</span><span class=p>:</span> <span class=s2>&#34;nick1&#34;</span>
+    <span class=p>}</span><span class=p>,</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user2@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;abc321&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+        <span class=nt>&#34;nickname&#34;</span><span class=p>:</span> <span class=s2>&#34;nick2&#34;</span>
+    <span class=p>}</span>
+<span class=p>]</span>
+</code></pre></td></tr></table></div></div><p><img src=/images/postman-runner/3.jpeg alt></p></li><li><p>看到选择的文件名，自动设置了迭代次数和文件类型。
+<img src=/images/postman-runner/4.jpeg alt></p></li><li><p>可以预览json文件数据，一行代表一次请求数据。
+<img src=/images/postman-runner/5.jpeg alt></p></li><li><p>运行所有任务。
+<img src=/images/postman-runner/6.jpeg alt></p></li><li><p>查看运行结果。
+<img src=/images/postman-runner/7.jpeg alt></p></li></ol><h1 id=附录>附录</h1><h2 id=如何快速批量生成json测试数据文件>如何快速批量生成json测试数据文件</h2><p>打开<a href=https://json-generator.com/>网址https://json-generator.com/</a>，</p><ol><li><p>左边是预设模版，右边是生成的结果数据区域，可点击<code>generate</code>生成，可点击<code>help</code>查看模板和函数说明
+<img src=/images/postman-runner/9.jpeg alt>
+<img src=/images/postman-runner/10.jpeg alt></p></li><li><p>示例
+设置模板，<code>{{}}</code>中为函数或变量，<code>{{repeat(3)}}</code>表示生成三条数据，</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-JSON data-lang=JSON><span class=p>[</span>
+<span class=err>&#39;</span><span class=p>{</span><span class=err>{</span><span class=err>r</span><span class=err>e</span><span class=err>p</span><span class=err>e</span><span class=err>a</span><span class=err>t</span><span class=err>(</span><span class=err>3</span><span class=err>)</span><span class=p>}</span><span class=err>}</span><span class=err>&#39;</span><span class=p>,</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user{{index()}}@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;awsd456&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=err>&#39;</span><span class=p>{</span><span class=err>{</span><span class=err>r</span><span class=err>a</span><span class=err>n</span><span class=err>d</span><span class=err>o</span><span class=err>m</span><span class=err>(</span><span class=err>1</span><span class=err>,</span><span class=err>2</span><span class=err>)</span><span class=p>}</span><span class=p>}</span><span class=err>&#39;</span><span class=p>,</span>
+        <span class=s2>&#34;nickname&#34;</span><span class=err>:</span> <span class=s2>&#34;nick{{index()}}&#34;</span>
+    <span class=err>}</span>
+<span class=p>]</span>
+</code></pre></td></tr></table></div></div><p>生成的数据文件</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-JSON data-lang=JSON><span class=p>[</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user0@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;awsd456&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>,</span>
+        <span class=nt>&#34;nickname&#34;</span><span class=p>:</span> <span class=s2>&#34;nick0&#34;</span>
+    <span class=p>}</span><span class=p>,</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user1@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;awsd456&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+        <span class=nt>&#34;nickname&#34;</span><span class=p>:</span> <span class=s2>&#34;nick1&#34;</span>
+    <span class=p>}</span><span class=p>,</span>
+    <span class=p>{</span>
+        <span class=nt>&#34;username&#34;</span><span class=p>:</span> <span class=s2>&#34;user2@abc.com&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;password&#34;</span><span class=p>:</span> <span class=s2>&#34;awsd456&#34;</span><span class=p>,</span>
+        <span class=nt>&#34;gender&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>,</span>
+        <span class=nt>&#34;nickname&#34;</span><span class=p>:</span> <span class=s2>&#34;nick2&#34;</span>
+    <span class=p>}</span>
+<span class=p>]</span>
+</code></pre></td></tr></table></div></div><p><img src=/images/postman-runner/11.jpeg alt></p></li></ol></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>tureo</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2022-03-31</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/postman/>postman</a>
+<a href=/tags/%E6%B5%8B%E8%AF%95/>测试</a>
+<a href=/tags/%E6%8E%A5%E5%8F%A3/>接口</a></div><nav class=post-nav><a class=next href=/post/go%E4%B8%AD%E6%8C%89map%E4%B8%AD%E7%9A%84%E6%9F%90%E4%B8%AA%E5%AD%97%E6%AE%B5%E5%AF%B9map%E6%95%B0%E7%BB%84%E6%8E%92%E5%BA%8F/><span class="next-text nav-default">Go中按Map中的某个字段对Map数组排序</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links><a href=mailto:dawushi@hotmail.com class="iconfont icon-email" title=email></a><a href=https://github.com/tureo class="iconfont icon-github" title=github></a><a href=http://localhost:1313/index.xml type=application/rss+xml class="iconfont icon-rss" title=rss></a></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动</span>
+<span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a></span>
+<span class=copyright-year>&copy;
+2021 -
+2022<span class=heart><i class="iconfont icon-heart"></i></span><span>tureo</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.min.js integrity="sha256-jwCP0NAdCBloaIWTWHmW4i3snUNMHUNO+jr9rYd2iOI=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/timeago.js@3.0.2/dist/timeago.locales.min.js integrity="sha256-ZwofwC1Lf/faQCzN7nZtfijVV6hSwxjQMwXL4gn9qU8=" crossorigin=anonymous></script><script>var languageCode="en".replace(/-/g,'_').replace(/_(.*)/,function($0,$1){return $0.replace($1,$1.toUpperCase());});timeago().render(document.querySelectorAll('.timeago'),languageCode);timeago.cancel();</script><script type=text/javascript src=/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js></script></body></html>
