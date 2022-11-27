@@ -3,7 +3,7 @@
 <a href=/categories/gin/>gin</a>
 <a href=/categories/gorm/>gorm</a>
 <a href=/categories/toml/>toml</a></div><span class=more-meta>约 1762 字</span>
-<span class=more-meta>预计阅读 4 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><a href=#问题背景>问题背景</a></li><li><a href=#mysql直接插入的解决方法>mysql直接插入的解决方法</a></li><li><a href=#使用mysqlgogingorm的解决方法>使用mysql+go+gin+gorm的解决方法</a></li></ul></nav></div></div><div class=post-outdated><div class=hint><p>【注意】最后更新于 <span class=timeago datetime=2021-11-22T21:52:45 title="November 22, 2021">November 22, 2021</span>，文中内容可能已过时，请谨慎使用。</p></div></div><div class=post-content><h1 id=问题背景>问题背景</h1><p>最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口的请求头中取，所以需要写一个api路由中间件，每当用户请求后端接口时：
+<span class=more-meta>预计阅读 4 分钟</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class="post-toc-content always-active"><nav id=TableOfContents><ul><li><a href=#问题背景>问题背景</a></li><li><a href=#mysql直接插入的解决方法>mysql直接插入的解决方法</a></li><li><a href=#使用mysqlgogingorm的解决方法>使用mysql+go+gin+gorm的解决方法</a></li></ul></nav></div></div><div class=post-outdated><div class=warn><p>【注意】最后更新于 <span class=timeago datetime=2021-11-22T21:52:45 title="November 22, 2021">November 22, 2021</span>，文中内容可能已过时，请谨慎使用。</p></div></div><div class=post-content><h1 id=问题背景>问题背景</h1><p>最近在管控平台中的一个项目需要维护一个用户名列表，但管控平台不提供获取所有用户名的接口，这个用户名只能从管控平台前端页面调用后端接口的请求头中取，所以需要写一个api路由中间件，每当用户请求后端接口时：
 <strong>判断用户名是否存在本地数据库的user用户表中，如果存在，则忽略，不存在则插入</strong>。
 user表建表语句大致如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
